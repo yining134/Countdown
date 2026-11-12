@@ -39,5 +39,5 @@ struct Skin: Identifiable {
     let manifest: SkinManifest
     let directory: URL
     let isBuiltIn: Bool
-    var id: String { manifest.id }
+    var id: String { isBuiltIn ? "builtin:\(manifest.id)" : "import:\(directory.lastPathComponent)" }
 }

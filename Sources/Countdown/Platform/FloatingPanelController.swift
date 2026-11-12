@@ -33,18 +33,18 @@ final class FloatingPanelController: NSObject, NSWindowDelegate {
             })
     }
 
-    func show() { panel.orderFrontRegardless() }
+    func show() { resize(); panel.orderFrontRegardless() }
     func hide() { panel.orderOut(nil) }
 
     func resize() {
         guard let model else { return }
         let old = panel.frame
-        panel.setFrame(NSRect(x: old.minX, y: old.minY, width: max(112, model.preferences.widgetSize),
-                              height: model.preferences.widgetSize + 44), display: true)
+        panel.setFrame(NSRect(x: old.minX, y: old.minY, width: model.preferences.widgetSize,
+                              height: model.preferences.widgetSize + 32 + (model.preferences.showRemainingTime ? 24 : 0)), display: true)
         clampToScreen()
     }
 
-    func resetPosition() {
+    private func placeInitially() {
         guard let screen = NSScreen.main ?? NSScreen.screens.first else { return }
         let visible = screen.visibleFrame
         panel.setFrameOrigin(NSPoint(x: visible.maxX - panel.frame.width - 40, y: visible.minY + 60))
@@ -60,7 +60,7 @@ final class FloatingPanelController: NSObject, NSWindowDelegate {
         if defaults.object(forKey: "widgetX") != nil {
             panel.setFrameOrigin(NSPoint(x: defaults.double(forKey: "widgetX"), y: defaults.double(forKey: "widgetY")))
             clampToScreen()
-        } else { resetPosition() }
+        } else { placeInitially() }
     }
 
     private func savePosition() {
@@ -81,28 +81,4 @@ final class FloatingPanelController: NSObject, NSWindowDelegate {
 
 private extension CGRect {
     var area: CGFloat { isNull ? 0 : max(0, width) * max(0, height) }
-}
-
-struct WidgetPointerSurface: NSViewRepresentable {
-    var onClick: () -> Void
-    func makeNSView(context: Context) -> WidgetPointerView { WidgetPointerView() }
-    func updateNSView(_ view: WidgetPointerView, context: Context) { view.onClick = onClick }
-}
-
-final class WidgetPointerView: NSView {
-    var onClick: (() -> Void)?
-    override func acceptsFirstMouse(for event: NSEvent?) -> Bool { true }
-
-    override func mouseDown(with event: NSEvent) {
-        guard let window else { return }
-        let start = event.locationInWindow
-        while let next = window.nextEvent(matching: [.leftMouseDragged, .leftMouseUp]) {
-            if next.type == .leftMouseUp { onClick?(); return }
-            let delta = next.locationInWindow
-            if hypot(delta.x - start.x, delta.y - start.y) > 4 {
-                window.performDrag(with: next)
-                return
-            }
-        }
-    }
 }

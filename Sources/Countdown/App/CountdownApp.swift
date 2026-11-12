@@ -7,7 +7,7 @@ struct CountdownApp: App {
     @State private var startupError: String?
 
     var body: some Scene {
-        WindowGroup("Countdown", id: "main") {
+        Window("设置", id: "main") {
             Group {
                 if let model { MainScene(model: model) }
                 else if let startupError { Text(startupError).padding(30) }
@@ -22,14 +22,20 @@ struct CountdownApp: App {
                 } catch { startupError = error.localizedDescription }
             }
         }
-        .defaultSize(width: 810, height: 640)
+        .windowResizability(.contentSize)
         .commands {
             CommandGroup(replacing: .newItem) {}
+            CommandGroup(replacing: .appSettings) {
+                Button("设置…") { model?.openMainWindow?() }.keyboardShortcut(",")
+            }
             CommandGroup(after: .importExport) {
                 Button("导入皮肤 ZIP…") { model?.chooseZIP() }.keyboardShortcut("o")
             }
         }
-        MenuBarExtra("Countdown", systemImage: "leaf") {
+        MenuBarExtra("Countdown", systemImage: "leaf", isInserted: Binding(
+            get: { model?.preferences.showMenuBarIcon ?? true },
+            set: { model?.preferences.showMenuBarIcon = $0 }
+        )) {
             if let model { CountdownMenu(model: model) }
             else { Text("Countdown 正在启动") }
         }

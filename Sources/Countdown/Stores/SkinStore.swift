@@ -22,11 +22,14 @@ final class SkinStore {
     func reload() {
         skins = skins.filter(\.isBuiltIn)
         warning = nil
-        let directories = (try? FileManager.default.contentsOfDirectory(at: library, includingPropertiesForKeys: nil)) ?? []
-        for directory in directories where !directory.lastPathComponent.hasPrefix(".") {
+        let directories = (try? FileManager.default.contentsOfDirectory(at: library, includingPropertiesForKeys: [.creationDateKey])) ?? []
+        for directory in directories.sorted(by: {
+            let left = (try? $0.resourceValues(forKeys: [.creationDateKey]).creationDate) ?? .distantPast
+            let right = (try? $1.resourceValues(forKeys: [.creationDateKey]).creationDate) ?? .distantPast
+            return left == right ? $0.lastPathComponent < $1.lastPathComponent : left < right
+        }) where !directory.lastPathComponent.hasPrefix(".") {
             do {
                 let skin = try SkinValidator.load(directory: directory)
-                guard !skins.contains(where: { $0.id == skin.id }) else { continue }
                 skins.append(skin)
             } catch { warning = "部分皮肤无法加载：\(error.localizedDescription)" }
         }
@@ -36,13 +39,11 @@ final class SkinStore {
 
     func install(staged: URL) throws -> String {
         let skin = try SkinValidator.load(directory: staged)
-        guard !skins.contains(where: { $0.id == skin.id }) else {
-            throw SkinError(message: "已存在相同 ID 的皮肤，请先删除旧皮肤再导入。")
-        }
-        let destination = library.appendingPathComponent(skin.id, isDirectory: true)
+        let destination = library.appendingPathComponent(UUID().uuidString.lowercased(), isDirectory: true)
         try FileManager.default.moveItem(at: staged, to: destination)
-        skins.append(Skin(manifest: skin.manifest, directory: destination, isBuiltIn: false))
-        return skin.id
+        let installed = Skin(manifest: skin.manifest, directory: destination, isBuiltIn: false)
+        skins.append(installed)
+        return installed.id
     }
 
     func delete(_ skin: Skin) throws {

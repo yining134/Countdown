@@ -21,6 +21,10 @@ final class AppModel {
         preferences = PreferencesStore()
         countdown = CountdownStore(directory: directory)
         skins = try SkinStore(directory: directory)
+        if !skins.skins.contains(where: { $0.id == preferences.selectedSkinID }),
+           let previous = skins.skins.first(where: { $0.manifest.id == preferences.selectedSkinID }) {
+            preferences.selectedSkinID = previous.id
+        }
         countdown.onCompletion = { [weak self] in
             guard let self else { return }
             self.sound.play(skin: self.selectedSkin)
@@ -36,16 +40,23 @@ final class AppModel {
     }
 
     func toggleWidget() {
-        if widgetVisible {
+        if widgetVisible && preferences.showMenuBarIcon {
             widgetVisible = false
             panelController?.hide()
         } else { showWidget() }
     }
 
-    func primaryAction() {
-        if countdown.phase == .idle || countdown.phase == .completed {
+    func primaryAction(expectedPhase: CountdownPhase) {
+        countdown.refresh()
+        guard countdown.phase == expectedPhase else { return }
+        switch expectedPhase {
+        case .idle:
             sound.stop()
             countdown.start(duration: preferences.duration)
+        case .running, .paused:
+            countdown.togglePause()
+        case .completed:
+            reset()
         }
     }
 
@@ -59,15 +70,24 @@ final class AppModel {
         preferences.selectedSkinID = skin.id
     }
 
-    func deleteSelected() {
-        let skin = selectedSkin
+    func delete(_ skin: Skin) {
+        guard !skin.isBuiltIn else { return }
         do {
+            let wasSelected = selectedSkin.id == skin.id
             try skins.delete(skin)
-            if !skin.isBuiltIn { preferences.selectedSkinID = skins.skins[0].id }
+            if wasSelected {
+                sound.stop()
+                preferences.selectedSkinID = skins.skins[0].id
+            }
         } catch { errorMessage = error.localizedDescription }
     }
 
+    func menuBarVisibilityChanged() {
+        if !preferences.showMenuBarIcon { showWidget() }
+    }
+
     func chooseZIP() {
+        guard !importing else { return }
         let picker = NSOpenPanel()
         picker.allowedContentTypes = [.zip]
         picker.allowsMultipleSelection = false

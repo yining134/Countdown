@@ -1,54 +1,18 @@
 import Foundation
 
-final class DownloadGuard: NSObject, URLSessionDownloadDelegate, @unchecked Sendable {
-    func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask,
-                    didWriteData bytesWritten: Int64, totalBytesWritten: Int64,
-                    totalBytesExpectedToWrite: Int64) {
-        if totalBytesWritten > ZIPPreflight.maxArchive || totalBytesExpectedToWrite > ZIPPreflight.maxArchive {
-            downloadTask.cancel()
-        }
-    }
-
-    func urlSession(_ session: URLSession, task: URLSessionTask,
-                    willPerformHTTPRedirection response: HTTPURLResponse, newRequest request: URLRequest,
-                    completionHandler: @escaping (URLRequest?) -> Void) {
-        let url = request.url
-        completionHandler(url?.scheme?.lowercased() == "https" && url?.user == nil && url?.password == nil ? request : nil)
-    }
-
-    func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask, didFinishDownloadingTo location: URL) {}
-}
-
 struct SkinImporter {
     static func prepare(url: URL, stagingParent: URL) async throws -> URL {
+        guard url.isFileURL else { throw SkinError(message: "仅支持导入本地 ZIP 文件。") }
         let task = Task.detached(priority: .userInitiated) { () throws -> URL in
             let fm = FileManager.default
             let workspace = stagingParent.appendingPathComponent(".import-" + UUID().uuidString, isDirectory: true)
             try fm.createDirectory(at: workspace, withIntermediateDirectories: true)
             do {
                 let archive = workspace.appendingPathComponent("skin.zip")
-                if url.isFileURL {
-                    let access = url.startAccessingSecurityScopedResource()
-                    defer { if access { url.stopAccessingSecurityScopedResource() } }
-                    try ZIPPreflight.validate(url)
-                    try fm.copyItem(at: url, to: archive)
-                } else {
-                    guard url.scheme?.lowercased() == "https", url.host != nil,
-                          url.user == nil, url.password == nil else {
-                        throw SkinError(message: "请输入不带凭据的 HTTPS ZIP 直链。")
-                    }
-                    let configuration = URLSessionConfiguration.ephemeral
-                    configuration.timeoutIntervalForRequest = 30
-                    configuration.timeoutIntervalForResource = 120
-                    let session = URLSession(configuration: configuration)
-                    defer { session.invalidateAndCancel() }
-                    let (location, response) = try await session.download(from: url, delegate: DownloadGuard())
-                    guard let http = response as? HTTPURLResponse, (200...299).contains(http.statusCode),
-                          http.url?.scheme?.lowercased() == "https" else {
-                        throw SkinError(message: "皮肤下载失败，请检查 ZIP 直链。")
-                    }
-                    try fm.moveItem(at: location, to: archive)
-                }
+                let access = url.startAccessingSecurityScopedResource()
+                defer { if access { url.stopAccessingSecurityScopedResource() } }
+                try ZIPPreflight.validate(url)
+                try fm.copyItem(at: url, to: archive)
                 try Task.checkCancellation()
                 try ZIPPreflight.validate(archive)
                 let expanded = workspace.appendingPathComponent("expanded", isDirectory: true)

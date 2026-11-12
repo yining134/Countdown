@@ -4,37 +4,78 @@ struct FloatingWidget: View {
     let model: AppModel
     @State private var hovering = false
 
+    private var canReset: Bool { model.countdown.phase == .running || model.countdown.phase == .paused }
+    private var showsControls: Bool { model.countdown.phase != .completed }
+    private var controlLabel: String {
+        switch model.countdown.phase {
+        case .idle: return "开始计时"
+        case .running: return "暂停计时"
+        case .paused: return "继续计时"
+        case .completed: return "重置倒计时"
+        }
+    }
+    private var clickLabel: String {
+        switch model.countdown.phase {
+        case .idle: return "开始倒计时"
+        case .running: return "暂停倒计时"
+        case .paused: return "继续倒计时"
+        case .completed: return "重置倒计时"
+        }
+    }
+    private var timeLabel: String {
+        let remaining = model.countdown.phase == .idle ? model.preferences.duration : model.countdown.remaining
+        let seconds = max(0, Int(ceil(remaining)))
+        return String(format: "%02d:%02d", seconds / 60, seconds % 60)
+    }
+
     var body: some View {
         let timer = model.countdown
         let skin = model.selectedSkin
+        let phase = timer.phase
         VStack(spacing: 0) {
             SpriteView(skin: skin, animationName: skin.manifest.animationName(phase: timer.phase, progress: timer.progress),
-                       playing: timer.phase != .paused && model.widgetVisible)
+                       playing: (phase == .running || phase == .completed) && model.widgetVisible)
                 .frame(width: model.preferences.widgetSize, height: model.preferences.widgetSize)
-                .overlay { WidgetPointerSurface { model.primaryAction() } }
-                .help(timer.phase == .idle || timer.phase == .completed ? "点击开始倒计时，拖动调整位置" : "拖动调整位置")
-            HStack(spacing: 8) {
-                if timer.phase == .running || timer.phase == .paused {
-                    Button { timer.togglePause() } label: {
-                        Image(systemName: timer.phase == .paused ? "play.fill" : "pause.fill")
-                    }.help(timer.phase == .paused ? "继续" : "暂停")
+                .overlay {
+                    WidgetPointerSurface(onClick: { model.primaryAction(expectedPhase: phase) }, onSettings: { model.openMainWindow?() }, label: clickLabel)
                 }
-                Button { model.reset() } label: { Image(systemName: "arrow.counterclockwise") }.help("重置")
-                Button {
-                    model.openMainWindow?()
-                } label: { Image(systemName: "gearshape") }.help("打开主窗口")
+                .help(clickLabel + "；拖动移动，右键打开设置")
+            if model.preferences.showRemainingTime {
+                Text(timeLabel).font(.system(size: 12, weight: .medium, design: .rounded)).monospacedDigit()
+                    .padding(.horizontal, 6).padding(.vertical, 2)
+                    .background(.regularMaterial, in: Capsule())
+                    .frame(height: 24)
+                    .accessibilityLabel("剩余时间 \(timeLabel)")
             }
-            .buttonStyle(.borderless)
-            .padding(.horizontal, 10)
+            HStack(spacing: 8) {
+                Button { model.primaryAction(expectedPhase: phase) } label: {
+                    Image(systemName: phase == .running ? "pause.fill" : "play.fill")
+                        .font(.system(size: 11, weight: .medium))
+                        .frame(width: 24, height: 24)
+                        .background(.regularMaterial, in: Circle())
+                }
+                .help(controlLabel)
+                .accessibilityLabel(controlLabel)
+                if canReset {
+                    Button { model.reset() } label: {
+                        Image(systemName: "arrow.counterclockwise").font(.system(size: 11, weight: .medium))
+                            .frame(width: 24, height: 24)
+                            .background(.regularMaterial, in: Circle())
+                    }
+                    .help("重置")
+                    .accessibilityLabel("重置倒计时")
+                }
+            }
+            .buttonStyle(.plain)
+            .opacity(hovering && showsControls ? 1 : 0)
+            .allowsHitTesting(hovering && showsControls)
+            .accessibilityHidden(!hovering || !showsControls)
             .frame(height: 32)
-            .background(.regularMaterial, in: Capsule())
-            .opacity(hovering ? 1 : 0)
-            .allowsHitTesting(hovering)
-            .frame(height: 44)
         }
-        .frame(width: max(112, model.preferences.widgetSize))
+        .frame(width: model.preferences.widgetSize)
         .contentShape(Rectangle())
         .onHover { hovering = $0 }
         .onChange(of: model.preferences.widgetSize) { model.panelController?.resize() }
+        .onChange(of: model.preferences.showRemainingTime) { model.panelController?.resize() }
     }
 }
