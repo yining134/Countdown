@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 1,
+  "id": "countdown.example",
+  "name": "Imported Sprout",
+  "author": "Countdown",
+  "spritesheet": "spritesheet.png",
+  "frameSize": {
+    "width": 128,
+    "height": 128
+  },
+  "animations": {
+    "seed": {
+      "startFrame": 0,
+      "frameCount": 4,
+      "fps": 4
+    },
+    "sprout": {
+      "startFrame": 4,
+      "frameCount": 4,
+      "fps": 4
+    },
+    "sapling": {
+      "startFrame": 8,
+      "frameCount": 4,
+      "fps": 4
+    },
+    "tree": {
+      "startFrame": 12,
+      "frameCount": 4,
+      "fps": 4
+    },
+    "celebrate": {
+      "startFrame": 16,
+      "frameCount": 4,
+      "fps": 8
+    }
+  },
+  "idle": "seed",
+  "stages": [
+    {
+      "from": 0,
+      "animation": "seed"
+    },
+    {
+      "from": 0.25,
+      "animation": "sprout"
+    },
+    {
+      "from": 0.5,
+      "animation": "sapling"
+    },
+    {
+      "from": 0.75,
+      "animation": "tree"
+    }
+  ],
+  "completed": "celebrate"
+}
