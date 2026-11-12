@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "id": "countdown.black-cat",
+  "name": "Pixel Black Cat",
+  "author": "Countdown",
+  "spritesheet": "spritesheet.png",
+  "frameSize": {
+    "width": 128,
+    "height": 128
+  },
+  "animations": {
+    "ready": {
+      "startFrame": 0,
+      "frameCount": 4,
+      "fps": 3
+    },
+    "work": {
+      "startFrame": 4,
+      "frameCount": 4,
+      "fps": 5
+    },
+    "stretch": {
+      "startFrame": 8,
+      "frameCount": 4,
+      "fps": 4
+    },
+    "play": {
+      "startFrame": 12,
+      "frameCount": 4,
+      "fps": 6
+    }
+  },
+  "idle": "ready",
+  "stages": [
+    {
+      "from": 0,
+      "animation": "ready"
+    },
+    {
+      "from": 0.33,
+      "animation": "work"
+    },
+    {
+      "from": 0.67,
+      "animation": "stretch"
+    }
+  ],
+  "completed": "play"
+}

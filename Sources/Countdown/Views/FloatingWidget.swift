@@ -8,18 +8,18 @@ struct FloatingWidget: View {
     private var showsControls: Bool { model.countdown.phase != .completed }
     private var controlLabel: String {
         switch model.countdown.phase {
-        case .idle: return "开始计时"
-        case .running: return "暂停计时"
-        case .paused: return "继续计时"
-        case .completed: return "重置倒计时"
+        case .idle: return L10n.text("开始计时")
+        case .running: return L10n.text("暂停计时")
+        case .paused: return L10n.text("继续计时")
+        case .completed: return L10n.text("重置倒计时")
         }
     }
     private var clickLabel: String {
         switch model.countdown.phase {
-        case .idle: return "开始倒计时"
-        case .running: return "暂停倒计时"
-        case .paused: return "继续倒计时"
-        case .completed: return "重置倒计时"
+        case .idle: return L10n.text("开始倒计时")
+        case .running: return L10n.text("暂停倒计时")
+        case .paused: return L10n.text("继续倒计时")
+        case .completed: return L10n.text("重置倒计时")
         }
     }
     private var timeLabel: String {
@@ -39,13 +39,13 @@ struct FloatingWidget: View {
                 .overlay {
                     WidgetPointerSurface(onClick: { model.primaryAction(expectedPhase: phase) }, onSettings: { model.openMainWindow?() }, label: clickLabel)
                 }
-                .help(clickLabel + "；拖动移动，右键打开设置")
+                .help(clickLabel + L10n.text("；拖动移动，右键打开设置"))
             if model.preferences.showRemainingTime {
                 Text(timeLabel).font(.system(size: 12, weight: .medium, design: .rounded)).monospacedDigit()
                     .padding(.horizontal, 6).padding(.vertical, 2)
                     .background(.regularMaterial, in: Capsule())
                     .frame(height: 24)
-                    .accessibilityLabel("剩余时间 \(timeLabel)")
+                    .accessibilityLabel(L10n.format("剩余时间 %@", timeLabel))
             }
             HStack(spacing: 8) {
                 Button { model.primaryAction(expectedPhase: phase) } label: {
@@ -62,8 +62,8 @@ struct FloatingWidget: View {
                             .frame(width: 24, height: 24)
                             .background(.regularMaterial, in: Circle())
                     }
-                    .help("重置")
-                    .accessibilityLabel("重置倒计时")
+                    .help(L10n.text("重置"))
+                    .accessibilityLabel(L10n.text("重置倒计时"))
                 }
             }
             .buttonStyle(.plain)

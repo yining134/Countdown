@@ -2,7 +2,7 @@ import Foundation
 
 struct SkinImporter {
     static func prepare(url: URL, stagingParent: URL) async throws -> URL {
-        guard url.isFileURL else { throw SkinError(message: "仅支持导入本地 ZIP 文件。") }
+        guard url.isFileURL else { throw SkinError(message: L10n.text("仅支持导入本地 ZIP 文件。")) }
         let task = Task.detached(priority: .userInitiated) { () throws -> URL in
             let fm = FileManager.default
             let workspace = stagingParent.appendingPathComponent(".import-" + UUID().uuidString, isDirectory: true)
@@ -46,13 +46,13 @@ struct SkinImporter {
             if Task.isCancelled || Date().timeIntervalSince(started) > 20 || size > ZIPPreflight.maxExpanded {
                 process.terminate()
                 process.waitUntilExit()
-                throw SkinError(message: "解压已取消、超时或超出大小限制。")
+                throw SkinError(message: L10n.text("解压已取消、超时或超出大小限制。"))
             }
             Thread.sleep(forTimeInterval: 0.05)
         }
         process.waitUntilExit()
-        guard process.terminationStatus == 0 else { throw SkinError(message: "ZIP 解压失败。") }
-        guard try expandedSize(destination) <= ZIPPreflight.maxExpanded else { throw SkinError(message: "解压内容超过大小限制。") }
+        guard process.terminationStatus == 0 else { throw SkinError(message: L10n.text("ZIP 解压失败。")) }
+        guard try expandedSize(destination) <= ZIPPreflight.maxExpanded else { throw SkinError(message: L10n.text("解压内容超过大小限制。")) }
     }
 
     private static func expandedSize(_ directory: URL) throws -> Int {
@@ -64,7 +64,7 @@ struct SkinImporter {
             let value = try file.resourceValues(forKeys: Set(keys))
             guard count <= 200, value.isSymbolicLink != true,
                   value.isRegularFile == true || value.isDirectory == true else {
-                throw SkinError(message: "解压内容包含链接、特殊文件或过多条目。")
+                throw SkinError(message: L10n.text("解压内容包含链接、特殊文件或过多条目。"))
             }
             total += value.fileSize ?? 0
         }

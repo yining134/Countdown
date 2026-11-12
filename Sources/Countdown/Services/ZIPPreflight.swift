@@ -7,7 +7,7 @@ struct ZIPPreflight {
     static func validate(_ url: URL) throws {
         let attributes = try FileManager.default.attributesOfItem(atPath: url.path)
         guard let size = attributes[.size] as? Int, size <= maxArchive else {
-            throw SkinError(message: "ZIP 不得超过 25 MiB。")
+            throw SkinError(message: L10n.text("ZIP 不得超过 25 MiB。"))
         }
         let data = try Data(contentsOf: url)
         func u16(_ offset: Int) -> Int {
@@ -16,20 +16,20 @@ struct ZIPPreflight {
         func u32(_ offset: Int) -> Int {
             u16(offset) | (u16(offset + 2) << 16)
         }
-        guard data.count >= 22 else { throw SkinError(message: "ZIP 文件不完整。") }
+        guard data.count >= 22 else { throw SkinError(message: L10n.text("ZIP 文件不完整。")) }
         let lower = max(0, data.count - 65557)
         guard let end = stride(from: data.count - 22, through: lower, by: -1).first(where: {
             u32($0) == 0x06054b50 && $0 + 22 + u16($0 + 20) == data.count
-        }) else { throw SkinError(message: "无法读取 ZIP 目录。") }
+        }) else { throw SkinError(message: L10n.text("无法读取 ZIP 目录。")) }
         let count = u16(end + 10), centralSize = u32(end + 12), centralOffset = u32(end + 16)
         guard u16(end + 4) == 0, u16(end + 6) == 0, u16(end + 8) == count,
               (1...200).contains(count), centralOffset + centralSize == end else {
-            throw SkinError(message: "不支持分卷、ZIP64 或超过 200 个条目的 ZIP。")
+            throw SkinError(message: L10n.text("不支持分卷、ZIP64 或超过 200 个条目的 ZIP。"))
         }
         var offset = centralOffset, expanded = 0, names = Set<String>(), occupied: [Range<Int>] = []
         for _ in 0..<count {
             guard offset >= 0, offset + 46 <= end, u32(offset) == 0x02014b50 else {
-                throw SkinError(message: "ZIP 目录已损坏。")
+                throw SkinError(message: L10n.text("ZIP 目录已损坏。"))
             }
             let flags = u16(offset + 8), method = u16(offset + 10)
             let compressed = u32(offset + 20), uncompressed = u32(offset + 24)
@@ -48,7 +48,7 @@ struct ZIPPreflight {
                   uncompressed <= maxExpanded, compressed <= maxArchive,
                   local >= 0, local + 30 <= centralOffset, u32(local) == 0x04034b50,
                   u16(local + 6) == flags, u16(local + 8) == method else {
-                throw SkinError(message: "ZIP 包含非法路径、重复条目、链接、加密或不支持的压缩格式。")
+                throw SkinError(message: L10n.text("ZIP 包含非法路径、重复条目、链接、加密或不支持的压缩格式。"))
             }
             let localName = u16(local + 26), localExtra = u16(local + 28)
             let contentStart = local + 30 + localName + localExtra
@@ -56,13 +56,13 @@ struct ZIPPreflight {
                   data.subdata(in: local + 30..<local + 30 + localName) == data.subdata(in: offset + 46..<offset + 46 + length),
                   contentStart + compressed <= centralOffset,
                   !occupied.contains(where: { $0.overlaps(local..<contentStart + compressed) }) else {
-                throw SkinError(message: "ZIP 本地条目与目录不一致。")
+                throw SkinError(message: L10n.text("ZIP 本地条目与目录不一致。"))
             }
             occupied.append(local..<contentStart + compressed)
             expanded += uncompressed
-            guard expanded <= maxExpanded else { throw SkinError(message: "ZIP 展开后不得超过 100 MiB。") }
+            guard expanded <= maxExpanded else { throw SkinError(message: L10n.text("ZIP 展开后不得超过 100 MiB。")) }
             offset += 46 + length + extra + comment
         }
-        guard offset == end else { throw SkinError(message: "ZIP 目录长度不匹配。") }
+        guard offset == end else { throw SkinError(message: L10n.text("ZIP 目录长度不匹配。")) }
     }
 }

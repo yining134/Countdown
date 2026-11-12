@@ -3,6 +3,7 @@ import SwiftUI
 struct GeneralSettingsView: View {
     let model: AppModel
     @State private var minutes = ""
+    @State private var showingTimeHelp = false
     @FocusState private var editingMinutes: Bool
 
     var body: some View {
@@ -18,24 +19,32 @@ struct GeneralSettingsView: View {
                             .frame(width: 56)
                             .focused($editingMinutes)
                             .onSubmit { commitMinutes() }
-                            .accessibilityLabel("倒计时分钟数")
-                        Text("分钟").foregroundStyle(.secondary).fixedSize()
+                            .accessibilityLabel(L10n.text("倒计时分钟数"))
+                        Text(L10n.text("分钟")).foregroundStyle(.secondary).fixedSize()
                     }
                 } label: {
                     HStack(spacing: 5) {
-                        Text("倒计时时长")
-                        Image(systemName: "questionmark.circle")
-                            .imageScale(.small).foregroundStyle(.secondary)
-                            .help("修改时长在下次开始时生效")
-                            .accessibilityLabel("修改时长在下次开始时生效")
+                        Text(L10n.text("时间"))
+                        Button { showingTimeHelp.toggle() } label: {
+                            Image(systemName: "questionmark.circle")
+                                .imageScale(.small).foregroundStyle(.secondary)
+                                .frame(width: 20, height: 20)
+                                .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
+                        .onHover { showingTimeHelp = $0 }
+                        .popover(isPresented: $showingTimeHelp, arrowEdge: .bottom) {
+                            Text(L10n.text("修改时长在下次开始时生效")).padding(12)
+                        }
+                        .accessibilityLabel(L10n.text("修改时长在下次开始时生效"))
                     }
                 }
-                LabeledContent("组件大小") {
+                LabeledContent(L10n.text("组件大小")) {
                     Slider(value: $preferences.widgetSize, in: 64...256, step: 16)
-                        .frame(width: 180).accessibilityLabel("组件大小")
+                        .frame(width: 180).accessibilityLabel(L10n.text("组件大小"))
                 }
-                Toggle("显示剩余时间", isOn: $preferences.showRemainingTime)
-                Toggle("显示菜单栏图标", isOn: $preferences.showMenuBarIcon)
+                Toggle(L10n.text("显示剩余时间"), isOn: $preferences.showRemainingTime)
+                Toggle(L10n.text("显示菜单栏图标"), isOn: $preferences.showMenuBarIcon)
             }
         }
         .formStyle(.grouped)

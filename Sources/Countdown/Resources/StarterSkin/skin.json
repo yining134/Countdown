@@ -19,20 +19,15 @@
       "frameCount": 4,
       "fps": 4
     },
-    "sapling": {
+    "bud": {
       "startFrame": 8,
       "frameCount": 4,
       "fps": 4
     },
-    "tree": {
+    "celebrate": {
       "startFrame": 12,
       "frameCount": 4,
-      "fps": 4
-    },
-    "celebrate": {
-      "startFrame": 16,
-      "frameCount": 4,
-      "fps": 8
+      "fps": 6
     }
   },
   "idle": "seed",
@@ -42,16 +37,12 @@
       "animation": "seed"
     },
     {
-      "from": 0.25,
+      "from": 0.33,
       "animation": "sprout"
     },
     {
-      "from": 0.5,
-      "animation": "sapling"
-    },
-    {
-      "from": 0.75,
-      "animation": "tree"
+      "from": 0.67,
+      "animation": "bud"
     }
   ],
   "completed": "celebrate"

@@ -26,11 +26,11 @@ final class WidgetPointerView: NSView {
 
     override func menu(for event: NSEvent) -> NSMenu? {
         let menu = NSMenu()
-        let settings = NSMenuItem(title: "设置…", action: #selector(openSettings), keyEquivalent: "")
+        let settings = NSMenuItem(title: L10n.text("设置…"), action: #selector(openSettings), keyEquivalent: "")
         settings.target = self
         menu.addItem(settings)
         menu.addItem(.separator())
-        let quit = NSMenuItem(title: "退出 Countdown", action: #selector(quitApp), keyEquivalent: "")
+        let quit = NSMenuItem(title: L10n.text("退出 Countdown"), action: #selector(quitApp), keyEquivalent: "")
         quit.target = self
         menu.addItem(quit)
         return menu

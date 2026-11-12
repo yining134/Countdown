@@ -17,7 +17,7 @@ struct ThemeSettingsView: View {
                         .accessibilityAddTraits(model.selectedSkin.id == skin.id ? [.isSelected] : [])
                         .contextMenu {
                             if !skin.isBuiltIn {
-                                Button("删除主题", role: .destructive) { model.delete(skin) }
+                                Button(L10n.text("删除主题"), role: .destructive) { model.delete(skin) }
                             }
                         }
                     }
@@ -29,15 +29,15 @@ struct ThemeSettingsView: View {
                     }
                     .buttonStyle(.plain)
                     .disabled(model.importing)
-                    .accessibilityLabel("导入主题")
-                    .help("导入主题")
+                    .accessibilityLabel(L10n.text("导入主题"))
+                    .help(L10n.text("导入主题"))
                 }.padding(12)
             }
             if model.importing {
                 HStack(spacing: 8) {
                     ProgressView().controlSize(.small)
-                    Text("正在导入…").font(.caption)
-                    Button("取消") { model.cancelImport() }
+                    Text(L10n.text("正在导入…")).font(.caption)
+                    Button(L10n.text("取消")) { model.cancelImport() }
                 }.padding(.bottom, 8)
             }
             if let warning = model.skins.warning {

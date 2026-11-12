@@ -13,7 +13,7 @@ final class SkinStore {
         let packagedBundle = Bundle.main.resourceURL?.appendingPathComponent("Countdown_Countdown.bundle")
         let resources = packagedBundle.flatMap(Bundle.init(url:)) ?? Bundle.module
         guard let starter = resources.url(forResource: "StarterSkin", withExtension: nil) else {
-            throw SkinError(message: "内置皮肤资源缺失。")
+            throw SkinError(message: L10n.text("内置皮肤资源缺失。"))
         }
         skins = [try SkinValidator.load(directory: starter, builtIn: true)]
         reload()
@@ -31,7 +31,7 @@ final class SkinStore {
             do {
                 let skin = try SkinValidator.load(directory: directory)
                 skins.append(skin)
-            } catch { warning = "部分皮肤无法加载：\(error.localizedDescription)" }
+            } catch { warning = L10n.format("部分皮肤无法加载：%@", error.localizedDescription) }
         }
     }
 
