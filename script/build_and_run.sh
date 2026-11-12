@@ -39,6 +39,7 @@ cat > "$APP_CONTENTS/Info.plist" <<PLIST
 <key>CFBundleExecutable</key><string>$APP_NAME</string>
 <key>CFBundleIdentifier</key><string>$BUNDLE_ID</string>
 <key>CFBundleName</key><string>$APP_NAME</string>
+<key>CFBundleIconFile</key><string>Countdown.icns</string>
 <key>CFBundlePackageType</key><string>APPL</string>
 <key>CFBundleShortVersionString</key><string>0.1.0</string>
 <key>CFBundleVersion</key><string>1</string>
@@ -49,6 +50,8 @@ cat > "$APP_CONTENTS/Info.plist" <<PLIST
 <key>NSHighResolutionCapable</key><true/>
 </dict></plist>
 PLIST
+swift script/packaging/release_art.swift "$ROOT_DIR/dist/artwork" "$ROOT_DIR/Sources/Countdown/Resources/StarterSkin/spritesheet.png"
+/usr/bin/iconutil -c icns "$ROOT_DIR/dist/artwork/Countdown.iconset" -o "$APP_CONTENTS/Resources/Countdown.icns"
 /usr/bin/codesign --force --deep --sign - "$APP_BUNDLE"
 case "$MODE" in
   run) /usr/bin/open -n "$APP_BUNDLE" ;;

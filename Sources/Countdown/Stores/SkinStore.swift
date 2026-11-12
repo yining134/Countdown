@@ -10,8 +10,7 @@ final class SkinStore {
     init(directory: URL) throws {
         library = directory.appendingPathComponent("Skins", isDirectory: true)
         try FileManager.default.createDirectory(at: library, withIntermediateDirectories: true)
-        let packagedBundle = Bundle.main.resourceURL?.appendingPathComponent("Countdown_Countdown.bundle")
-        let resources = packagedBundle.flatMap(Bundle.init(url:)) ?? Bundle.module
+        let resources = AppResources.bundle
         guard let starter = resources.url(forResource: "StarterSkin", withExtension: nil) else {
             throw SkinError(message: L10n.text("内置皮肤资源缺失。"))
         }
@@ -22,7 +21,14 @@ final class SkinStore {
     func reload() {
         skins = skins.filter(\.isBuiltIn)
         warning = nil
-        let directories = (try? FileManager.default.contentsOfDirectory(at: library, includingPropertiesForKeys: [.creationDateKey])) ?? []
+        let directories: [URL]
+        do {
+            directories = try FileManager.default.contentsOfDirectory(
+                at: library, includingPropertiesForKeys: [.creationDateKey])
+        } catch {
+            warning = L10n.format("部分皮肤无法加载：%@", error.localizedDescription)
+            return
+        }
         for directory in directories.sorted(by: {
             let left = (try? $0.resourceValues(forKeys: [.creationDateKey]).creationDate) ?? .distantPast
             let right = (try? $1.resourceValues(forKeys: [.creationDateKey]).creationDate) ?? .distantPast
@@ -35,7 +41,7 @@ final class SkinStore {
         }
     }
 
-    func selected(id: String) -> Skin { skins.first(where: { $0.id == id }) ?? skins[0] }
+    func selectedSkin(id: String) -> Skin { skins.first(where: { $0.id == id }) ?? skins[0] }
 
     func install(staged: URL) throws -> String {
         let skin = try SkinValidator.load(directory: staged)

@@ -1,18 +1,37 @@
 import Foundation
 
 struct SkinManifest: Codable {
-    struct FrameSize: Codable { let width: Int; let height: Int }
+    enum CodingKeys: String, CodingKey {
+        case schemaVersion, id, name, author, frameSize, animations, idle, stages, paused, completed, completionSound
+        case spriteSheetPath = "spritesheet"
+    }
+    struct FrameSize: Codable {
+        let width: Int
+        let height: Int
+    }
     struct Animation: Codable {
+        enum CodingKeys: String, CodingKey {
+            case startFrame, frameCount
+            case framesPerSecond = "fps"
+        }
         let startFrame: Int
         let frameCount: Int
-        let fps: Double
+        let framesPerSecond: Double
     }
-    struct Stage: Codable { let from: Double; let animation: String }
+    /// 已完成比例从 0 开始，严格递增且小于 1。
+    struct Stage: Codable {
+        let progressThreshold: Double
+        let animation: String
+        enum CodingKeys: String, CodingKey {
+            case progressThreshold = "from"
+            case animation
+        }
+    }
     let schemaVersion: Int
     let id: String
     let name: String
     let author: String?
-    let spritesheet: String
+    let spriteSheetPath: String
     let frameSize: FrameSize
     let animations: [String: Animation]
     let idle: String
@@ -31,13 +50,6 @@ struct SkinManifest: Codable {
     }
 
     private func stageName(_ progress: Double) -> String {
-        stages.last(where: { progress >= $0.from })?.animation ?? idle
+        stages.last(where: { progress >= $0.progressThreshold })?.animation ?? idle
     }
-}
-
-struct Skin: Identifiable {
-    let manifest: SkinManifest
-    let directory: URL
-    let isBuiltIn: Bool
-    var id: String { isBuiltIn ? "builtin:\(manifest.id)" : "import:\(directory.lastPathComponent)" }
 }

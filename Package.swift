@@ -6,5 +6,11 @@ let package = Package(
     defaultLocalization: "en",
     platforms: [.macOS(.v14)],
     products: [.executable(name: "Countdown", targets: ["Countdown"])],
-    targets: [.executableTarget(name: "Countdown", resources: [.copy("Resources/StarterSkin"), .process("Resources/en.lproj"), .process("Resources/zh-Hans.lproj")])]
+    targets: [
+        .executableTarget(
+            name: "Countdown",
+            resources: [
+                .copy("Resources/StarterSkin"), .process("Resources/en.lproj"), .process("Resources/zh-Hans.lproj"),
+            ])
+    ]
 )

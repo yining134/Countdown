@@ -9,9 +9,13 @@ struct CountdownApp: App {
     var body: some Scene {
         Window(L10n.text("设置"), id: "main") {
             Group {
-                if let model { MainScene(model: model) }
-                else if let startupError { Text(startupError).padding(30) }
-                else { ProgressView().padding(50) }
+                if let model {
+                    SettingsSceneRoot(model: model)
+                } else if let startupError {
+                    Text(startupError).padding(30)
+                } else {
+                    ProgressView().padding(50)
+                }
             }
             .task {
                 guard model == nil, startupError == nil else { return }
@@ -23,30 +27,15 @@ struct CountdownApp: App {
             }
         }
         .windowResizability(.contentSize)
-        .commands {
-            CommandGroup(replacing: .newItem) {}
-            CommandGroup(replacing: .appSettings) {
-                Button(L10n.text("设置…")) { model?.openMainWindow?() }.keyboardShortcut(",")
-            }
-            CommandGroup(after: .importExport) {
-                Button(L10n.text("导入皮肤 ZIP…")) { model?.chooseZIP() }.keyboardShortcut("o")
-            }
-        }
-        MenuBarExtra("Countdown", systemImage: "leaf", isInserted: Binding(
-            get: { model?.preferences.showMenuBarIcon ?? true },
-            set: { model?.preferences.showMenuBarIcon = $0 }
-        )) {
-            if let model { CountdownMenu(model: model) }
-            else { Text(L10n.text("Countdown 正在启动")) }
+        .commands { AppCommands(model: model) }
+        MenuBarExtra(
+            "Countdown", systemImage: "leaf",
+            isInserted: Binding(
+                get: { model?.preferences.showMenuBarIcon ?? true },
+                set: { model?.preferences.showMenuBarIcon = $0 }
+            )
+        ) {
+            if let model { CountdownMenuView(model: model) } else { Text(L10n.text("Countdown 正在启动")) }
         }
     }
 }
-
-final class AppDelegate: NSObject, NSApplicationDelegate {
-    func applicationDidFinishLaunching(_ notification: Notification) {
-        NSApp.setActivationPolicy(.regular)
-        NSApp.activate(ignoringOtherApps: true)
-    }
-    func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool { false }
-}
-

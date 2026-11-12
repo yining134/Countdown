@@ -7,20 +7,20 @@ final class CountdownStore {
     private(set) var now = Date()
     var onCompletion: (() -> Void)?
     @ObservationIgnored private var ticker: Timer?
-    @ObservationIgnored private let file: URL
+    @ObservationIgnored private let persistence: SessionPersistence
 
     var phase: CountdownPhase { session.phase }
     var remaining: TimeInterval { session.remaining(at: now) }
     var progress: Double { min(1, max(0, 1 - remaining / session.duration)) }
 
     init(directory: URL) {
-        file = directory.appendingPathComponent("Session.json")
-        if let data = try? Data(contentsOf: file),
-           let restored = try? JSONDecoder().decode(CountdownSession.self, from: data),
-           restored.duration.isFinite, (1...86400).contains(restored.duration),
-           restored.pausedRemaining.isFinite,
-           (0...restored.duration).contains(restored.pausedRemaining),
-           restored.phase != .running || restored.deadline != nil {
+        persistence = SessionPersistence(directory: directory)
+        if let restored = persistence.load(),
+            restored.duration.isFinite, (1...86400).contains(restored.duration),
+            restored.pausedRemaining.isFinite,
+            (0...restored.duration).contains(restored.pausedRemaining),
+            restored.phase != .running || restored.deadline != nil
+        {
             session = restored
         }
         refresh(notify: false)
@@ -40,9 +40,10 @@ final class CountdownStore {
     }
 
     func start(duration: TimeInterval) {
-        session = CountdownSession(phase: .running, duration: duration,
-                                   deadline: Date().addingTimeInterval(duration), pausedRemaining: duration)
         now = Date()
+        session = CountdownSession(
+            phase: .running, duration: duration,
+            deadline: now.addingTimeInterval(duration), pausedRemaining: duration)
         updateTicker()
         persist()
     }
@@ -54,7 +55,8 @@ final class CountdownStore {
             session.phase = .paused
             session.deadline = nil
         } else if phase == .paused {
-            session.deadline = Date().addingTimeInterval(session.pausedRemaining)
+            now = Date()
+            session.deadline = now.addingTimeInterval(session.pausedRemaining)
             session.phase = .running
         }
         updateTicker()
@@ -78,6 +80,6 @@ final class CountdownStore {
     }
 
     private func persist() {
-        if let data = try? JSONEncoder().encode(session) { try? data.write(to: file, options: .atomic) }
+        persistence.save(session)
     }
 }

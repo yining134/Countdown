@@ -8,21 +8,24 @@ final class AppModel {
     let skins: SkinStore
     let sound = CompletionSoundPlayer()
     var errorMessage: String?
-    var importing = false
-    var widgetVisible = true
+    var isImporting = false
+    var isWidgetVisible = true
     @ObservationIgnored private(set) var panelController: FloatingPanelController?
-    @ObservationIgnored var openMainWindow: (() -> Void)?
+    @ObservationIgnored var openSettingsWindow: (() -> Void)?
     @ObservationIgnored private var importTask: Task<Void, Never>?
 
     init() throws {
-        let directory = try FileManager.default.url(for: .applicationSupportDirectory,
-            in: .userDomainMask, appropriateFor: nil, create: true).appendingPathComponent("local.countdown.app", isDirectory: true)
+        let directory = try FileManager.default.url(
+            for: .applicationSupportDirectory,
+            in: .userDomainMask, appropriateFor: nil, create: true
+        ).appendingPathComponent("local.countdown.app", isDirectory: true)
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
         preferences = PreferencesStore()
         countdown = CountdownStore(directory: directory)
         skins = try SkinStore(directory: directory)
         if !skins.skins.contains(where: { $0.id == preferences.selectedSkinID }),
-           let previous = skins.skins.first(where: { $0.manifest.id == preferences.selectedSkinID }) {
+            let previous = skins.skins.first(where: { $0.manifest.id == preferences.selectedSkinID })
+        {
             preferences.selectedSkinID = previous.id
         }
         countdown.onCompletion = { [weak self] in
@@ -31,19 +34,21 @@ final class AppModel {
         }
     }
 
-    var selectedSkin: Skin { skins.selected(id: preferences.selectedSkinID) }
+    var selectedSkin: Skin { skins.selectedSkin(id: preferences.selectedSkinID) }
 
     func showWidget() {
         if panelController == nil { panelController = FloatingPanelController(model: self) }
-        widgetVisible = true
+        isWidgetVisible = true
         panelController?.show()
     }
 
     func toggleWidget() {
-        if widgetVisible && preferences.showMenuBarIcon {
-            widgetVisible = false
+        if isWidgetVisible && preferences.showMenuBarIcon {
+            isWidgetVisible = false
             panelController?.hide()
-        } else { showWidget() }
+        } else {
+            showWidget()
+        }
     }
 
     func primaryAction(expectedPhase: CountdownPhase) {
@@ -86,28 +91,28 @@ final class AppModel {
         if !preferences.showMenuBarIcon { showWidget() }
     }
 
-    func chooseZIP() {
-        guard !importing else { return }
-        let picker = NSOpenPanel()
-        picker.allowedContentTypes = [.zip]
-        picker.allowsMultipleSelection = false
-        picker.canChooseDirectories = false
-        picker.begin { [weak self] result in
-            guard result == .OK, let url = picker.url else { return }
+    func presentSkinImportPanel() {
+        guard !isImporting else { return }
+        SkinImportPanel.present { [weak self] url in
             self?.importSkin(url)
         }
     }
 
     func importSkin(_ url: URL) {
-        guard !importing else { return }
-        importing = true
+        guard !isImporting else { return }
+        isImporting = true
         importTask = Task {
-            defer { importing = false; importTask = nil }
+            defer {
+                isImporting = false
+                importTask = nil
+            }
             do {
                 let staged = try await SkinImporter.prepare(url: url, stagingParent: skins.library)
                 defer { try? FileManager.default.removeItem(at: staged.deletingLastPathComponent()) }
                 try Task.checkCancellation()
-                preferences.selectedSkinID = try skins.install(staged: staged)
+                let installedID = try skins.install(staged: staged)
+                sound.stop()
+                preferences.selectedSkinID = installedID
             } catch is CancellationError {
             } catch { errorMessage = error.localizedDescription }
         }
