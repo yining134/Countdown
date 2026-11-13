@@ -2,38 +2,24 @@
 
 [English](README.en.md) | 简体中文
 
-可自定义动画主题的极简 macOS 桌面倒计时。
+一个支持自定义主题的 macOS 桌面像素倒计时。
 
-## 特性
+## 主题
 
-- 透明悬浮组件，跨桌面置顶，可拖动、缩放并记住位置。
-- 单击开始、暂停或继续，悬停显示控制按钮。
-- 自定义倒计时时长，可选显示剩余时间和菜单栏图标。
-- 动画随计时进度变化，支持主题自带的完成音效。
-- 通过本地 ZIP 导入、切换和分享主题
+以下主题均已内置。
 
-## 下载与使用
+| 主题 | 开花 | 小鸡孵化 | 四季列车 | 黑猫 |
+| --- | --- | --- | --- | --- |
+| 预览 | <img src="docs/images/themes/sprout.gif" alt="种子发芽、生长到开花" width="128" height="128"> | <img src="docs/images/themes/chick.gif" alt="蛋壳摇晃、裂开到小鸡破壳" width="128" height="128"> | <img src="docs/images/themes/train.gif" alt="列车穿过春夏秋冬，最后到站" width="128" height="128"> | <img src="docs/images/themes/cat.gif" alt="黑猫从工作到放松玩耍" width="128" height="128"> |
 
-支持 **macOS 14 及以上版本**，兼容 Apple Silicon 和 Intel。[下载发布版本](https://github.com/yining134/Countdown/releases)。打开 DMG 后将左侧 Countdown 拖到右侧 Applications。自定义皮肤通过下方 ZIP 链接下载并导入。
+## 使用
 
-当前发布使用临时签名，尚未经过 Apple 公证。
-
-单击桌面组件开始计时，右键打开设置。在“主题”中点击“＋”选择 ZIP，或将 ZIP 拖入主题页。完成后单击重置，再次点击开始。
+- 支持 macOS 14 及以上版本。
+- 单击素材开始、暂停或继续计时，悬浮显示控制按钮。
+- 拖动移动组件，右键打开设置，调整时长、大小和剩余时间显示。
 
 ## 自定义主题
 
-主题由 **PNG 精灵图 + JSON** 组成，打包为 ZIP 即可导入。
+在“设置 → 主题”点击“＋”，或直接拖入主题 ZIP。
 
-- [素材制作提示词](docs/THEME_PROMPT.md)：复制给 Agent，制作自己的主题。
-- [示例主题](Examples/Skins/PixelSprout/PixelSprout.zip) · [示例配置](Examples/Skins/PixelSprout/skin.json)
-- [黑猫主题](Examples/Skins/BlackCat/BlackCat.zip)
-
-## 本地构建
-
-[目录与开发约定](docs/ARCHITECTURE.md) · [重构记录](docs/REFACTOR.md)。运行 `./script/check.sh` 检查格式和严格并发。
-
-运行 `./script/build_and_run.sh` 构建并启动 App；运行 `./script/package_dmg.sh` 生成 Universal Release DMG，产物位于 `dist/`。需要 macOS、Swift 工具链和 Python 3；打包脚本首次运行会在 `.build/` 下安装 dmgbuild。
-
-## 参与贡献
-
-欢迎提交 Issue、Pull Request，或分享你制作的主题。
+主题由 PNG 精灵图和 JSON 配置组成，也可以使用 [主题制作提示词](docs/THEME_PROMPT.md) 制作自己的素材。

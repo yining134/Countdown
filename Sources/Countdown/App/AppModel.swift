@@ -7,6 +7,7 @@ final class AppModel {
     let countdown: CountdownStore
     let skins: SkinStore
     let sound = CompletionSoundPlayer()
+    private let notifications = CompletionNotificationService()
     var errorMessage: String?
     var isImporting = false
     var isWidgetVisible = true
@@ -31,6 +32,7 @@ final class AppModel {
         countdown.onCompletion = { [weak self] in
             guard let self else { return }
             self.sound.play(skin: self.selectedSkin)
+            self.notifications.notifyCompletion()
         }
     }
 
@@ -57,6 +59,7 @@ final class AppModel {
         switch expectedPhase {
         case .idle:
             sound.stop()
+            notifications.requestAuthorization()
             countdown.start(duration: preferences.duration)
         case .running, .paused:
             countdown.togglePause()

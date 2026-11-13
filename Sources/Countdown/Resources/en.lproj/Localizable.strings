@@ -13,6 +13,8 @@
 "仅支持导入本地 ZIP 文件。" = "Only local ZIP files can be imported.";
 "修改时长在下次开始时生效" = "Duration changes take effect on reset or the next countdown.";
 "倒计时分钟数" = "Countdown duration in minutes";
+"倒计时结束" = "Countdown complete";
+"本次计时已完成，休息一下吧。" = "Your countdown is complete. Time for a break.";
 "内置皮肤资源缺失。" = "Built-in theme resources are missing.";
 "分钟" = "min";
 "删除主题" = "Delete Theme";

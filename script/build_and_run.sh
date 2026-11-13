@@ -10,7 +10,7 @@ case "$MODE" in
   *) echo "usage: $0 [run|--debug|--logs|--telemetry|--verify|--build-only|--release-build]" >&2; exit 2 ;;
 esac
 pkill -x "$APP_NAME" >/dev/null 2>&1 || true
-BUILD_OPTIONS=()
+BUILD_OPTIONS=(-c debug)
 if [ "$MODE" = "--release-build" ]; then
   BUILD_OPTIONS=(-c release --triple arm64-apple-macosx14.0)
 fi
@@ -47,6 +47,7 @@ cat > "$APP_CONTENTS/Info.plist" <<PLIST
 <key>CFBundleDevelopmentRegion</key><string>en</string>
 <key>CFBundleLocalizations</key><array><string>en</string><string>zh-Hans</string></array>
 <key>NSPrincipalClass</key><string>NSApplication</string>
+<key>LSUIElement</key><true/>
 <key>NSHighResolutionCapable</key><true/>
 </dict></plist>
 PLIST

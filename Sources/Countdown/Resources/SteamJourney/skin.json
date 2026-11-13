@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 1,
+  "id": "countdown.steam-journey",
+  "name": "Seasonal Train",
+  "author": "Countdown",
+  "spritesheet": "spritesheet.png",
+  "frameSize": {
+    "width": 128,
+    "height": 128
+  },
+  "animations": {
+    "spring": {
+      "startFrame": 0,
+      "frameCount": 24,
+      "fps": 12
+    },
+    "summer": {
+      "startFrame": 24,
+      "frameCount": 24,
+      "fps": 12
+    },
+    "autumn": {
+      "startFrame": 48,
+      "frameCount": 24,
+      "fps": 12
+    },
+    "winter": {
+      "startFrame": 72,
+      "frameCount": 24,
+      "fps": 12
+    },
+    "arrival": {
+      "startFrame": 96,
+      "frameCount": 24,
+      "fps": 12
+    }
+  },
+  "idle": "spring",
+  "stages": [
+    {
+      "from": 0.0,
+      "animation": "spring"
+    },
+    {
+      "from": 0.25,
+      "animation": "summer"
+    },
+    {
+      "from": 0.5,
+      "animation": "autumn"
+    },
+    {
+      "from": 0.75,
+      "animation": "winter"
+    }
+  ],
+  "completed": "arrival"
+}

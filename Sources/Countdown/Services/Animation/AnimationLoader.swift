@@ -20,24 +20,16 @@ struct AnimationLoader {
             guard let source = CGImageSourceCreateWithURL(url as CFURL, nil),
                 let properties = CGImageSourceCopyPropertiesAtIndex(source, 0, nil) as? [CFString: Any],
                 let width = properties[kCGImagePropertyPixelWidth] as? Int,
-                let height = properties[kCGImagePropertyPixelHeight] as? Int,
                 let animation = skin.manifest.animations[skin.manifest.completed],
-                let image = CGImageSourceCreateThumbnailAtIndex(
-                    source, 0,
-                    [
-                        kCGImageSourceCreateThumbnailFromImageAlways: true,
-                        kCGImageSourceThumbnailMaxPixelSize: 1024,
-                        kCGImageSourceShouldCacheImmediately: true,
-                    ] as CFDictionary)
+                let image = CGImageSourceCreateImageAtIndex(
+                    source, 0, [kCGImageSourceShouldCacheImmediately: true] as CFDictionary)
             else { throw SkinError(message: L10n.text("无法读取主题预览。")) }
             let size = skin.manifest.frameSize
             let columns = width / size.width
-            let scaleX = Double(image.width) / Double(width)
-            let scaleY = Double(image.height) / Double(height)
             let rect = CGRect(
-                x: Double(animation.startFrame % columns * size.width) * scaleX,
-                y: Double(animation.startFrame / columns * size.height) * scaleY,
-                width: Double(size.width) * scaleX, height: Double(size.height) * scaleY)
+                x: animation.startFrame % columns * size.width,
+                y: animation.startFrame / columns * size.height,
+                width: size.width, height: size.height)
             guard let frame = image.cropping(to: rect) else { throw SkinError(message: L10n.text("无法读取主题预览帧。")) }
             return SpriteAsset(image: frame)
         }.value

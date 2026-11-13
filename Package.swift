@@ -10,7 +10,10 @@ let package = Package(
         .executableTarget(
             name: "Countdown",
             resources: [
-                .copy("Resources/StarterSkin"), .process("Resources/en.lproj"), .process("Resources/zh-Hans.lproj"),
+                .copy("Resources/StarterSkin"), .copy("Resources/PixelChick"),
+                .copy("Resources/SteamJourney"), .copy("Resources/BlackCat"),
+                .copy("Resources/Fonts"),
+                .process("Resources/en.lproj"), .process("Resources/zh-Hans.lproj"),
             ])
     ]
 )

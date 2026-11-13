@@ -12,6 +12,7 @@
 | Services/Skins | ZIP 预检、解压、主题验证 |
 | Services/Animation | 精灵图和缩略图解码 |
 | Services/Audio | 完成音效播放 |
+| Services/Notifications | 完成通知与通知权限 |
 | Services/Persistence | 会话文件读写与失败日志 |
 | Views/Settings | 设置窗口内容、通用设置和主题管理 |
 | Views/Widget | 悬浮组件与菜单栏菜单 |
@@ -21,9 +22,11 @@
 | Platform/Rendering | 精灵动画的 AppKit 渲染 |
 | Platform/Panels | 系统文件选择器 |
 | Support | 统一资源入口、本地化与通知订阅生命周期 |
-| Resources | 随 App 打包的内置主题和翻译 |
+| Resources | 随 App 打包的内置主题、字体、授权和翻译 |
 
-AppModel 组合 Stores，并协调窗口、导入和音效；不在 SwiftUI 视图里直接启动解压进程或读写会话文件。基础模型不依赖 AppModel。AppKit 类型留在 Platform 和应用生命周期边界。
+AppModel 组合 Stores，并协调窗口、导入、音效和完成通知；不在 SwiftUI 视图里直接启动解压进程或读写会话文件。基础模型不依赖 AppModel。AppKit 类型留在 Platform 和应用生命周期边界。
+
+App 使用 accessory 激活策略，安装包设置 LSUIElement，默认不显示 Dock 图标。设置通过菜单栏或组件右键打开。
 
 一般设置视图接收 PreferencesStore 和必要回调；需要跨功能协调的窗口根视图和组件可接收 AppModel。只有实际需要替换实现时才新增协议。
 
@@ -47,14 +50,11 @@ Stores 和 UI 状态隔离到 MainActor。Timer 回调通过 MainActor 更新视
 
 ## 素材与工具
 
-- `Examples/Skins/{PixelSprout,BlackCat}/`：正式 JSON、PNG、ZIP 和预览。
-- `Design/Skins/{PixelSprout,BlackCat}/`：生成原图、提示词和历史草稿。
-- `Design/Skins/PixelSprout/Legacy/`：已停用的五阶段占位素材生成器。
-- `script/assets/`：正式素材整理脚本。需安装该目录 requirements.txt 中的 Pillow。
+- `Examples/Skins/`：主题 JSON、PNG、ZIP 和预览。内置 PixelSprout、PixelChick、SteamJourney 和 BlackCat。
+- `Design/`：仅本地保留的生成原图、提示词和历史草稿，不纳入 Git，不参与 App 构建。
+- `script/assets/`：素材整理脚本。需安装该目录 requirements.txt 中的 Pillow；重建主题素材需要本地 Design 源文件，重建 README 预览只需 Examples 中的主题文件。
 - `script/packaging/`：DMG 布局与图标/背景生成工具。App 图标依据内置主题清单的完成动画首帧生成。
 - `script/build_and_run.sh`：本地构建运行入口，仍由 Codex Run 按钮调用。
 - `script/package_dmg.sh`：Universal Release 构建与 DMG 打包。
-- `docs/releases/`：发布说明。
+- `docs/images/themes/`：README 使用的完整周期动画预览。
 - `dist/`、`.build/`：忽略的生成产物。
-
-重构不涉及主题重新绘制、发布版本升级、提交远程或上传 Release。关键修复与验证记录见 `REFACTOR.md`。

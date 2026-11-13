@@ -11,10 +11,12 @@ final class SkinStore {
         library = directory.appendingPathComponent("Skins", isDirectory: true)
         try FileManager.default.createDirectory(at: library, withIntermediateDirectories: true)
         let resources = AppResources.bundle
-        guard let starter = resources.url(forResource: "StarterSkin", withExtension: nil) else {
-            throw SkinError(message: L10n.text("内置皮肤资源缺失。"))
+        for name in ["StarterSkin", "PixelChick", "SteamJourney", "BlackCat"] {
+            guard let directory = resources.url(forResource: name, withExtension: nil) else {
+                throw SkinError(message: L10n.text("内置皮肤资源缺失。"))
+            }
+            skins.append(try SkinValidator.load(directory: directory, builtIn: true))
         }
-        skins = [try SkinValidator.load(directory: starter, builtIn: true)]
         reload()
     }
 

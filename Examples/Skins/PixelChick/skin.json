@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "id": "countdown.pixel-chick",
+  "name": "Pixel Chick",
+  "author": "Countdown",
+  "spritesheet": "spritesheet.png",
+  "frameSize": {
+    "width": 128,
+    "height": 128
+  },
+  "animations": {
+    "egg": {
+      "startFrame": 0,
+      "frameCount": 6,
+      "fps": 5
+    },
+    "cracked": {
+      "startFrame": 6,
+      "frameCount": 6,
+      "fps": 5
+    },
+    "peek": {
+      "startFrame": 12,
+      "frameCount": 6,
+      "fps": 5
+    },
+    "celebrate": {
+      "startFrame": 18,
+      "frameCount": 6,
+      "fps": 5
+    }
+  },
+  "idle": "egg",
+  "stages": [
+    {
+      "from": 0,
+      "animation": "egg"
+    },
+    {
+      "from": 0.33,
+      "animation": "cracked"
+    },
+    {
+      "from": 0.67,
+      "animation": "peek"
+    }
+  ],
+  "completed": "celebrate"
+}

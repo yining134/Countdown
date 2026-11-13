@@ -45,7 +45,7 @@ struct FloatingWidgetView: View {
             }
             .help(clickLabel + L10n.text("；拖动移动，右键打开设置"))
             if model.preferences.showRemainingTime {
-                Text(timeLabel).font(.system(size: 12, weight: .medium, design: .rounded)).monospacedDigit()
+                Text(timeLabel).font(WidgetTypography.countdown)
                     .padding(.horizontal, 6).padding(.vertical, 2)
                     .background(.regularMaterial, in: Capsule())
                     .frame(height: 24)
